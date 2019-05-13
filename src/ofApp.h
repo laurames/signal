@@ -57,4 +57,5 @@ class ofApp : public ofBaseApp{
     
     //for saving data:
     ofFile dataFile;
+    int offset = 0;
 };

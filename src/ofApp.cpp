@@ -9,7 +9,7 @@ void ofApp::setup(){
     receiver.setup(SEND_PORT); //we are listening to the port 5000 defined in ofApp.h
     
     //new file called data:
-    dataFile.open("dataFile.txt",ofFile::WriteOnly);
+    //dataFile.open("dataFile.txt",ofFile::WriteOnly);
     
     delta = theta = beta = alpha = gamma = 0.0; //all these variables are of float 0
 }
@@ -90,6 +90,7 @@ void ofApp::update(){
             rightForehead = msg.getArgAsInt(2);
             rightEar = msg.getArgAsInt(3);
         }
+        offset = ofRandom(-1, 1)*ofRandom(hSize);
     }
     
 }
@@ -150,9 +151,9 @@ void ofApp::draw(){
     /* trying to rewrite a file:
     if(linesOfTheFile.size()>50){
         //keep only 40
+        dataFile.open("dataFile.txt",ofFile::WriteOnly);
         for(int i=linesOfTheFile.size()-1; i>=linesOfTheFile.size()-40; i--){
             vector <string> splitItems = ofSplitString(linesOfTheFile[i], ",");
-            dataFile.open("dataFile.txt",ofFile::WriteOnly);
             //delta, theta, alpha, beta, gamma, signal: (0 or 1)
             dataFile << ofToString(splitItems[0]) + "," + ofToString(splitItems[1]) + "," + ofToString(splitItems[2]) + "," + ofToString(splitItems[3]) + "," + ofToString(splitItems[4]) + ", signal: "+ ofToString(splitItems[5]) +"\n";
         }
@@ -162,15 +163,23 @@ void ofApp::draw(){
     
     ofEnableAlphaBlending();    // turn on alpha blending
     int color = 255;
+    
     for(int i=linesOfTheFile.size()-1; i>=0; i--){
         vector <string> splitItems = ofSplitString(linesOfTheFile[i], ",");
-            ofSetColor(241, 226, 119, color/1.05);
-        //wSize-wSize/4, 0, wSize/4, hSize/4
-            linePoints[0].set(ofMap( ofToFloat(splitItems[0]),0,1,0,1024),ofMap( ofToFloat(splitItems[1]),0,1,0,768));
-            linePoints[1].set(ofMap( ofToFloat(splitItems[1]),0,1,0,1024),ofMap( ofToFloat(splitItems[2]),0,1,0,768));
-            linePoints[2].set(ofMap( ofToFloat(splitItems[2]),0,1,0,1024),ofMap( ofToFloat(splitItems[3]),0,1,0,768));
-            linePoints[3].set(ofMap( ofToFloat(splitItems[3]),0,1,0,1024),ofMap( ofToFloat(splitItems[4]),0,1,0,768));
-            linePoints[4].set(ofMap( ofToFloat(splitItems[4]),0,1,0,1024),ofMap( ofToFloat(splitItems[0]),0,1,0,768));
+            ofSetColor(241-i, 226-i, 119-i, color/1.05);
+        /*
+        0.159698,0.0806554,0.165869,0.372284,0.221493, signal: 1
+        0.132792,0.0836684,0.154343,0.39236,0.236837, signal: 1
+        0.0838018,0.0574778,0.139654,0.451473,0.267593, signal: 1
+         delta, theta, alpha, beta, gamma, signal (0 or 1)
+         + (offset*2)*/
+        
+        int offset2 = ofToFloat(splitItems[5]);
+            linePoints[0].set(ofMap( ofToFloat(splitItems[0]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[1]),0,1,0,768) + offset2);
+            linePoints[1].set(ofMap( ofToFloat(splitItems[1]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[2]),0,1,0,768) + offset2);
+            linePoints[2].set(ofMap( ofToFloat(splitItems[2]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[3]),0,1,0,768) + offset2);
+            linePoints[3].set(ofMap( ofToFloat(splitItems[3]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[4]),0,1,0,768) + offset2);
+            linePoints[4].set(ofMap( ofToFloat(splitItems[4]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[0]),0,1,0,768) + offset2);
             
             glEnableClientState(GL_VERTEX_ARRAY);
             glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
@@ -212,8 +221,8 @@ void ofApp::keyPressed(int key){
     //with s key press save to file the current data points
     if(key == 's'){
         dataFile.open("dataFile.txt",ofFile::Append);
-        //delta, theta, alpha, beta, gamma
-        dataFile << ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + ", signal: "+ ofToString(signalGood) +"\n";
+        //delta, theta, alpha, beta, gamma, offset, signal (0 or 1)
+        dataFile << ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(offset) +", signal: "+ ofToString(signalGood) +"\n";
     }
 }
 
