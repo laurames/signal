@@ -9,7 +9,7 @@ void ofApp::setup(){
     receiver.setup(SEND_PORT); //we are listening to the port 5000 defined in ofApp.h
     
     //new file called data:
-    //dataFile.open("dataFile.txt",ofFile::WriteOnly);
+    dataFile.open("dataFile.txt",ofFile::WriteOnly);
     
     delta = theta = beta = alpha = gamma = 0.0; //all these variables are of float 0
 }
@@ -62,11 +62,14 @@ void ofApp::update(){
                 
             }
             signalGood = true;
+            
+            /* getting data saved if the signal is good:
             dataFile.open("dataFile.txt",ofFile::Append);
             //delta, theta, alpha, beta, gamma
             dataFile << ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + ", signal: "+ ofToString(signalGood) +"\n";
+            */
         }else{
-            //we right mock data:
+            //we write mock data:
             mockdata = true;
             delta = (float)ofRandom(0,1);
             theta = (float)ofRandom(0,1);
@@ -87,12 +90,6 @@ void ofApp::update(){
             rightForehead = msg.getArgAsInt(2);
             rightEar = msg.getArgAsInt(3);
         }
-    }
-    
-    //reading data from file:
-    ofBuffer buffer = ofBufferFromFile("dataFile.txt");
-    for (auto line : buffer.getLines()){
-        linesOfTheFile.push_back(line);
     }
     
 }
@@ -144,6 +141,22 @@ void ofApp::draw(){
     ofFill();
     
     //------------------ READING FILE DATA ------------------//
+    //reading data from file:
+    vector < string > linesOfTheFile;
+    ofBuffer buffer = ofBufferFromFile("dataFile.txt");
+    for (auto line : buffer.getLines()){
+        linesOfTheFile.push_back(line);
+    }
+    /* trying to rewrite a file:
+    if(linesOfTheFile.size()>50){
+        //keep only 40
+        for(int i=linesOfTheFile.size()-1; i>=linesOfTheFile.size()-40; i--){
+            vector <string> splitItems = ofSplitString(linesOfTheFile[i], ",");
+            dataFile.open("dataFile.txt",ofFile::WriteOnly);
+            //delta, theta, alpha, beta, gamma, signal: (0 or 1)
+            dataFile << ofToString(splitItems[0]) + "," + ofToString(splitItems[1]) + "," + ofToString(splitItems[2]) + "," + ofToString(splitItems[3]) + "," + ofToString(splitItems[4]) + ", signal: "+ ofToString(splitItems[5]) +"\n";
+        }
+    }*/
     //for debugging (how many data points in file):
     //cout << linesOfTheFile.size() << endl;
     
@@ -163,8 +176,8 @@ void ofApp::draw(){
             glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
             glDrawArrays(GL_POLYGON, 0, 5);
         color = color/1.05;
-        //ofDrawBitmapString( ofToString(linesOfTheFile[i]) , 200, 100+(i*10) );
     }
+    
     ofDisableAlphaBlending();   // turn it back off, if you don't need it
     
     //------------------ YOUR CURRENT DATA ------------------//
@@ -190,11 +203,13 @@ void ofApp::draw(){
     ofDrawBitmapString("Headband battery at: " + ofToString(batteryPercentage) + "%", 50, 20);
     ofDrawBitmapString("leftEar: " + ofToString(leftEar) + ", leftForehead: " + ofToString(leftForehead) + ", rightForehead: " + ofToString(rightForehead) + ", rightEar: " + ofToString(rightEar), 50, 35);
     ofDrawBitmapString("Mock data: " + ofToString(mockdata), 50, 50);
-    
+    ofDrawBitmapString( ofToString(linesOfTheFile[linesOfTheFile.size()-1]) , 50, hSize-40 );
+
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    //with s key press save to file the current data points
     if(key == 's'){
         dataFile.open("dataFile.txt",ofFile::Append);
         //delta, theta, alpha, beta, gamma

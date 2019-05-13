@@ -57,5 +57,4 @@ class ofApp : public ofBaseApp{
     
     //for saving data:
     ofFile dataFile;
-    vector < string > linesOfTheFile;
 };
