@@ -2,13 +2,16 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    ofSetFrameRate(2);
-    ofBackground(0,0,0);
+    ofSetFrameRate(2); //framerate
+    ofBackground(0,0,0); //black background
     
     // OSC Setup
-    receiver.setup(SEND_PORT);
+    receiver.setup(SEND_PORT); //we are listening to the port 5000 defined in ofApp.h
     
-    delta = theta = beta = alpha = gamma = 0.0;
+    //new file called data:
+    //dataFile.open("dataFile.txt",ofFile::WriteOnly);
+    
+    delta = theta = beta = alpha = gamma = 0.0; //all these variables are of float 0
 }
 
 //--------------------------------------------------------------
@@ -19,6 +22,8 @@ void ofApp::update(){
     for(int i=0; i<5; i++){
         linePoints[i].set(ofRandom(1028),ofRandom(768));
     }*/
+    
+    //reading messages from OSC
     while (receiver.hasWaitingMessages()) {
         ofxOscMessage msg;
         receiver.getNextMessage(msg);
@@ -32,36 +37,60 @@ void ofApp::update(){
         // averaging the 4 channels for simplicity - change: keep all 4 in float array instead
         // if it NANS - it's because one of the args in the channel is NAN due to head band not being attached correctly. should add checks for this.
         // checking for "/muse/elements/is_good" for each of the 4 channels (1 then were ok).
-
-            if(msg.getAddress() == "/muse/elements/raw_fft0") {
-                cout << "raw_fft0 is: " << endl;
+        
+        if(leftEar == 1 && leftForehead == 1 && rightForehead == 1 && rightEar == 1){
+            if(msg.getAddress() == "/muse/elements/delta_relative") { //raw_fft0
+                cout << "delta is: " << endl;
                 cout << msg << endl;
-                //delta = getAverageFromChannels(msg);
-                delta = ofMap(msg.getNumArgs(),0, 1682.815, 0, 1024);
+                delta = getAverageFromChannels(msg);
+                //delta = ofMap(msg.getNumArgs(),0, 1682.815, 0, 1024);
                 
-            } else if(msg.getAddress() == "/muse/elements/raw_fft1") {
-                cout << "raw_fft1 is: " << endl;
+            } else if(msg.getAddress() == "/muse/elements/theta_relative") {
+                cout << "theta is: " << endl;
                 cout << msg << endl;
                 theta = getAverageFromChannels(msg);
                 
-            } else if(msg.getAddress() == "/muse/elements/raw_fft2") {
+            } else if(msg.getAddress() == "/muse/elements/alpha_relative") {
                 cout << "alpha is: " << endl;
                 cout << msg << endl;
                 alpha = getAverageFromChannels(msg);
                 
-            } else if(msg.getAddress() == "/muse/elements/raw_fft3") {
+            } else if(msg.getAddress() == "/muse/elements/beta_relative") {
                 cout << "beta is: " << endl;
                 cout << msg << endl;
                 beta = getAverageFromChannels(msg);
                 
+            } else if(msg.getAddress() == "/muse/elements/gamma_relative") {
+                cout << "gamma is: " << endl;
+                cout << msg << endl;
+                gamma = getAverageFromChannels(msg);
+                
             }
+            signalGood = true;
+        }else{
+            //we right mock data:
+            mockdata = true;
+            delta = (float)ofRandom(0,1);
+            theta = (float)ofRandom(0,1);
+            alpha = (float)ofRandom(0,1);
+            beta = (float)ofRandom(0,1);
+            gamma = (float)ofRandom(0,1);
+        }
+        
+        //reading battery data:
+        if(msg.getAddress() == "/muse/batt"){ //if we have a bettery message
+            batteryPercentage = msg.getArgAsFloat(0)/100;
+        }
+        //reading signal quality
+        if(msg.getAddress() == "/muse/elements/is_good"){
+            //left ear(0), left forehead(1), right forehead(2), right ear(3)
+            leftEar = msg.getArgAsInt(0);
+            leftForehead = msg.getArgAsInt(1);
+            rightForehead = msg.getArgAsInt(2);
+            rightEar = msg.getArgAsInt(3);
+        }
     }
-    
-    linePoints[0].set(ofMap(delta,0,1,0,1024),ofMap(delta,0,1,0,768));
-    linePoints[1].set(ofMap(theta,0,1,0,1024),ofMap(theta,0,1,0,768));
-    linePoints[2].set(ofMap(alpha,0,1,0,1024),ofMap(theta,0,1,0,768));
-    linePoints[3].set(ofMap(beta,0,1,0,1024),ofMap(beta,0,1,0,768));
-    linePoints[4].set(ofMap(gamma,0,1,0,1024),ofMap(gamma,0,1,0,768));
+
 }
 
 //--------------------------------------------------------------
@@ -69,7 +98,7 @@ float ofApp::getAverageFromChannels(ofxOscMessage& msg) {
     
     float avg = 0;
     int channels = msg.getNumArgs();
-    for(int i = 0; i < channels; i++) {
+    for(int i = 0; i < channels; i++) { //takes all channels
         avg += msg.getArgAsFloat(i);
     }
     avg /= channels;
@@ -108,20 +137,58 @@ float ofApp::getFromForeheadChannels(ofxOscMessage& msg) {
 //--------------------------------------------------------------
 void ofApp::draw(){
     
+    /* mockup data:
     ofSetColor(241, 226, 119);
     ofFill();
-    
+    linePoints[0].set(ofMap(delta,0,1,0,1024),ofMap(theta,0,1,0,768));
+    linePoints[1].set(ofMap(theta,0,1,0,1024),ofMap(alpha,0,1,0,768));
+    linePoints[2].set(ofMap(alpha,0,1,0,1024),ofMap(beta,0,1,0,768));
+    linePoints[3].set(ofMap(beta,0,1,0,1024),ofMap(gamma,0,1,0,768));
+    linePoints[4].set(ofMap(gamma,0,1,0,1024),ofMap(delta,0,1,0,768));
     
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
-    glDrawArrays(GL_POLYGON, 0, 5);
+    glDrawArrays(GL_POLYGON, 0, 5);*/
+    
+    //reading data from file:
+    ofSetColor(241, 226, 119);
+    ofFill();
+    vector < string > linesOfTheFile;
+    ofBuffer buffer = ofBufferFromFile("dataFile.txt");
+    for (auto line : buffer.getLines()){
+        linesOfTheFile.push_back(line);
+    }
+    
+    //for debugging (how many data points in file):
+    //cout << linesOfTheFile.size() << endl;
+    
+    ofEnableAlphaBlending();    // turn on alpha blending
+    int color = 255;
+    for(int i=linesOfTheFile.size()-1; i>=0; i--){
+        vector <string> splitItems = ofSplitString(linesOfTheFile[i], ",");
+            ofSetColor(241, 226, 119, color/1.05);
+            linePoints[0].set(ofMap( ofToFloat(splitItems[0]),0,1,0,1024),ofMap( ofToFloat(splitItems[1]),0,1,0,768));
+            linePoints[1].set(ofMap( ofToFloat(splitItems[1]),0,1,0,1024),ofMap( ofToFloat(splitItems[2]),0,1,0,768));
+            linePoints[2].set(ofMap( ofToFloat(splitItems[2]),0,1,0,1024),ofMap( ofToFloat(splitItems[3]),0,1,0,768));
+            linePoints[3].set(ofMap( ofToFloat(splitItems[3]),0,1,0,1024),ofMap( ofToFloat(splitItems[4]),0,1,0,768));
+            linePoints[4].set(ofMap( ofToFloat(splitItems[4]),0,1,0,1024),ofMap( ofToFloat(splitItems[0]),0,1,0,768));
+            
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
+            glDrawArrays(GL_POLYGON, 0, 5);
+        color = color/1.05;
+        //ofDrawBitmapString( ofToString(linesOfTheFile[i]) , 200, 100+(i*10) );
+    }
+    ofDisableAlphaBlending();   // turn it back off, if you don't need it
+    
+    // colours for debug text
+    ofSetColor(255,255,255);
+    //debug messages:
+    ofDrawBitmapString("Headband battery at: " + ofToString(batteryPercentage) + "%", 50, 50);
+    ofDrawBitmapString("leftEar: " + ofToString(leftEar) + ", leftForehead: " + ofToString(leftForehead) + ", rightForehead: " + ofToString(rightForehead) + ", rightEar: " + ofToString(rightEar), 50, 65);
+    ofDrawBitmapString("Mock data: " + ofToString(mockdata), 50, 80);
     
     /*
-    // colours for debug text
-    ofColor clearClr(0,0);
-    ofColor textClr(0);
-    
-    
     ofPushMatrix();
     ofTranslate(0,ofGetHeight()*.5);
     
@@ -164,7 +231,11 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-
+    if(key == 's'){
+        dataFile.open("dataFile.txt",ofFile::Append);
+        //delta, theta, alpha, beta, gamma
+        dataFile << ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + ", signal: "+ ofToString(signalGood) +"\n";
+    }
 }
 
 //--------------------------------------------------------------

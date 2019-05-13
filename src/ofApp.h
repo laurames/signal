@@ -25,7 +25,6 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 	
     /* Muse program variables */
-    //just need a receiver to read osc messages from port that muse is sending to
     // muse is running in terminal with: muse-io --device Muse-623E --osc osc.udp://localhost:5000
     ofxOscReceiver receiver;
     
@@ -37,16 +36,21 @@ class ofApp : public ofBaseApp{
     float beta;
     float gamma;
     
-    
     // helper methods to get individual channel data
     float getAverageFromChannels(ofxOscMessage& msg); //this is mostly used.
     float getHighestFromChannels(ofxOscMessage& msg);
     float getFromEarChannels(ofxOscMessage& msg);
     float getFromForeheadChannels(ofxOscMessage& msg);
     
-    // processed values (these are pretty much the same as the brainband's esense values)
+    //setting a variable to see if the signal is good or not
     bool signalGood = false;
+    float batteryPercentage = 100.0;
+    float leftEar = 0, leftForehead = 0, rightForehead = 0, rightEar = 0;
+    bool mockdata = false;
     
-    //an array with 2 points in it
+    //class for storing a two dimensional vector
     ofVec2f linePoints [5];
+    
+    //for saving data:
+    ofFile dataFile;
 };
