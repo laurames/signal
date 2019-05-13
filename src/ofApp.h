@@ -58,6 +58,10 @@ class ofApp : public ofBaseApp{
     
     //for saving data:
     ofFile dataFile;
+    vector < string > linesOfTheFile;
     int offset = 0;
     int randomColor;
+    
+    //timer for saving file:
+    int tick = 0;
 };

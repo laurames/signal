@@ -12,16 +12,33 @@ void ofApp::setup(){
     //dataFile.open("dataFile.txt",ofFile::WriteOnly);
     
     delta = theta = beta = alpha = gamma = 0.0; //all these variables are of float 0
+    
+    //reading data from file:
+    ofBuffer buffer = ofBufferFromFile("dataFile.txt");
+    for (auto line : buffer.getLines()){
+        linesOfTheFile.push_back(line);
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    if(tick > 30){
+        dataFile.open("dataFile.txt",ofFile::WriteOnly);
+        if(linesOfTheFile.size()>1){
+            for(int i=0; i<linesOfTheFile.size(); i++){
+                dataFile << linesOfTheFile[i] << "\n";
+            }
+        }
+        dataFile.close();
+        tick = 0;
+    }
+    cout << tick << endl;
+    tick++;
     
     //reading messages from OSC
     while (receiver.hasWaitingMessages()) {
         ofxOscMessage msg;
         receiver.getNextMessage(msg);
-        
         
         // all available messages (a lot with muse): https://sites.google.com/a/interaxon.ca/muse-developer-site/museio/osc-paths/3-4-0
         //ofLog() << msg.getAddress() << " : " << msg.getNumArgs();// << " : " << msg.getArgAsFloat(0);
@@ -143,22 +160,7 @@ void ofApp::draw(){
     ofFill();
     
     //------------------ READING FILE DATA ------------------//
-    //reading data from file:
-    vector < string > linesOfTheFile;
-    ofBuffer buffer = ofBufferFromFile("dataFile.txt");
-    for (auto line : buffer.getLines()){
-        linesOfTheFile.push_back(line);
-    }
-    /* trying to rewrite a file:
-    if(linesOfTheFile.size()>50){
-        //keep only 40
-        dataFile.open("dataFile.txt",ofFile::WriteOnly);
-        for(int i=linesOfTheFile.size()-1; i>=linesOfTheFile.size()-40; i--){
-            vector <string> splitItems = ofSplitString(linesOfTheFile[i], ",");
-            //delta, theta, alpha, beta, gamma, signal: (0 or 1)
-            dataFile << ofToString(splitItems[0]) + "," + ofToString(splitItems[1]) + "," + ofToString(splitItems[2]) + "," + ofToString(splitItems[3]) + "," + ofToString(splitItems[4]) + ", signal: "+ ofToString(splitItems[5]) +"\n";
-        }
-    }*/
+    
     //for debugging (how many data points in file):
     //cout << linesOfTheFile.size() << endl;
     
@@ -211,17 +213,18 @@ void ofApp::draw(){
     ofDrawBitmapString("Headband battery at: " + ofToString(batteryPercentage) + "%", 50, 20);
     ofDrawBitmapString("leftEar: " + ofToString(leftEar) + ", leftForehead: " + ofToString(leftForehead) + ", rightForehead: " + ofToString(rightForehead) + ", rightEar: " + ofToString(rightEar), 50, 35);
     ofDrawBitmapString("Mock data: " + ofToString(mockdata), 50, 50);
-    ofDrawBitmapString( ofToString(linesOfTheFile[linesOfTheFile.size()-1]) , 50, hSize-40 );
+    //ofDrawBitmapString( ofToString(linesOfTheFile[linesOfTheFile.size()-1]) , 50, hSize-40 );
 
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    //with s key press save to file the current data points
+    //with s key press save to file the current data points:
     if(key == 's'){
-        dataFile.open("dataFile.txt",ofFile::Append);
-        //delta, theta, alpha, beta, gamma, offset, randomColor, signal (0 or 1)
-        dataFile << ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(offset) + "," + ofToString(randomColor) + ", signal: "+ ofToString(signalGood) +"\n";
+        if(linesOfTheFile.size() > 25){
+            linesOfTheFile.erase(linesOfTheFile.begin());
+        }
+        linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(offset) + "," + ofToString(randomColor) + ", signal: "+ ofToString(signalGood));
     }
 }
 
