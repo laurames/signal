@@ -42,3 +42,42 @@ if(msg.getAddress() == "/muse/elements/is_good"){
             gamma = 0.5;
         }
     }
+    /*
+        ofPushMatrix();
+        ofTranslate(0,ofGetHeight()*.5);
+
+        // draw circles for each of the 5 eeg bands
+        int offsetX = ofGetWidth() / 6;
+
+        // delta yellow
+        ofSetColor(241, 226, 119);
+        float deltaScaled = ofMap(delta, 0, 1.0, 0, 150);
+        ofCircle(offsetX, 0, deltaScaled);
+        ofDrawBitmapStringHighlight("Delta:\n"+ofToString(delta,2), offsetX, 0, clearClr, textClr);
+
+        // theta green
+        ofSetColor(128, 188, 177);
+        float thetaScaled = ofMap(theta, 0, 1.0, 0, 150);
+        ofCircle(offsetX*2, 0, thetaScaled);
+        ofDrawBitmapStringHighlight("Theta:\n"+ofToString(theta,2), offsetX*2, 0, clearClr, textClr);
+
+        // alpha blue
+        ofSetColor(0, 174, 240);
+        float alphaScaled = ofMap(alpha, 0, 1.0, 0, 150);
+        ofCircle(offsetX*3, 0, alphaScaled);
+        ofDrawBitmapStringHighlight("Alpha:\n"+ofToString(alpha,2), offsetX*3, 0, clearClr, textClr);
+
+        // beta red
+        ofSetColor(255, 107, 130);
+        float betaScaled = ofMap(beta, 0, 1.0, 0, 150);
+        ofCircle(offsetX*4, 0, betaScaled);
+        ofDrawBitmapStringHighlight("Beta:\n"+ofToString(beta,2), offsetX*4, 0, clearClr, textClr);
+
+        // gamma orange
+        ofSetColor(255, 165, 106);
+        float gammaScaled = ofMap(gamma, 0, 1.0, 0, 150);
+        ofCircle(offsetX*5, 0, gammaScaled);
+        ofDrawBitmapStringHighlight("Gamma:\n"+ofToString(gamma,2), offsetX*5, 0, clearClr, textClr);
+
+        ofPopMatrix();
+        */

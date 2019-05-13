@@ -42,15 +42,20 @@ class ofApp : public ofBaseApp{
     float getFromEarChannels(ofxOscMessage& msg);
     float getFromForeheadChannels(ofxOscMessage& msg);
     
-    //setting a variable to see if the signal is good or not
+    //debugging variables:
     bool signalGood = false;
     float batteryPercentage = 100.0;
     float leftEar = 0, leftForehead = 0, rightForehead = 0, rightEar = 0;
     bool mockdata = false;
+    
+    //screen sizes:
+    float wSize = ofGetWidth();
+    float hSize = ofGetHeight();
     
     //class for storing a two dimensional vector
     ofVec2f linePoints [5];
     
     //for saving data:
     ofFile dataFile;
+    vector < string > linesOfTheFile;
 };
