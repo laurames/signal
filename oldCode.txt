@@ -1,0 +1,44 @@
+if(msg.getAddress() == "/muse/elements/is_good"){
+            ofLog() << msg;
+            if(msg.getArgAsInt(0)==1 && msg.getArgAsInt(1)==1 && msg.getArgAsInt(2)==1 && msg.getArgAsInt(3)==1){
+                signalGood = true;
+            }else{
+                signalGood = false;
+            }
+        }
+        //if signal good run the code to avoid NANs
+        if(signalGood){
+            if(msg.getAddress() == "/muse/elements/delta_relative") {
+                cout << "delta is: " << endl;
+                cout << msg << endl;
+                delta = getAverageFromChannels(msg);
+
+            } else if(msg.getAddress() == "/muse/elements/theta_relative") {
+                cout << "theta is: " << endl;
+                cout << msg << endl;
+                theta = getAverageFromChannels(msg);
+
+            } else if(msg.getAddress() == "/muse/elements/alpha_relative") {
+                cout << "alpha is: " << endl;
+                cout << msg << endl;
+                alpha = getAverageFromChannels(msg);
+
+            } else if(msg.getAddress() == "/muse/elements/beta_relative") {
+                cout << "beta is: " << endl;
+                cout << msg << endl;
+                beta = getAverageFromChannels(msg);
+
+            } else if(msg.getAddress() == "/muse/elements/gamma_relative") {
+                cout << "gamma is: " << endl;
+                cout << msg << endl;
+                gamma = getAverageFromChannels(msg);
+
+            }
+        }else{
+            delta = 0.5;
+            theta = 0.5;
+            alpha = 0.5;
+            beta = 0.5;
+            gamma = 0.5;
+        }
+    }
