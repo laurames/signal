@@ -8,7 +8,7 @@ void ofApp::setup(){
     // OSC Setup
     receiver.setup(SEND_PORT); //we are listening to the port 5000 defined in ofApp.h
     
-    //new file called data:
+    //new file called dataFile.txt:
     //dataFile.open("dataFile.txt",ofFile::WriteOnly);
     
     delta = theta = beta = alpha = gamma = 0.0; //all these variables are of float 0
@@ -91,6 +91,7 @@ void ofApp::update(){
             rightEar = msg.getArgAsInt(3);
         }
         offset = ofRandom(-1, 1)*ofRandom(hSize);
+        randomColor = ofRandom(255);
     }
     
 }
@@ -163,18 +164,15 @@ void ofApp::draw(){
     
     ofEnableAlphaBlending();    // turn on alpha blending
     int color = 255;
-    
-    for(int i=linesOfTheFile.size()-1; i>=0; i--){
-        vector <string> splitItems = ofSplitString(linesOfTheFile[i], ",");
-            ofSetColor(241-i, 226-i, 119-i, color/1.05);
-        /*
-        0.159698,0.0806554,0.165869,0.372284,0.221493, signal: 1
-        0.132792,0.0836684,0.154343,0.39236,0.236837, signal: 1
-        0.0838018,0.0574778,0.139654,0.451473,0.267593, signal: 1
-         delta, theta, alpha, beta, gamma, signal (0 or 1)
-         + (offset*2)*/
-        
-        int offset2 = ofToFloat(splitItems[5]);
+    if(linesOfTheFile.size()>1){
+        for(int i=linesOfTheFile.size()-1; i>=0; i--){
+            vector <string> splitItems = ofSplitString(linesOfTheFile[i], ",");
+            int offset2 = ofToFloat(splitItems[5]);
+            int randomC = ofToInt(splitItems[6]);
+            //ofSetColor(241-i, 226-i*2, 119-i*2, color/1.05);
+            ofSetColor(randomC, randomC-10, randomC+10, color/1.05);
+            
+            
             linePoints[0].set(ofMap( ofToFloat(splitItems[0]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[1]),0,1,0,768) + offset2);
             linePoints[1].set(ofMap( ofToFloat(splitItems[1]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[2]),0,1,0,768) + offset2);
             linePoints[2].set(ofMap( ofToFloat(splitItems[2]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[3]),0,1,0,768) + offset2);
@@ -184,7 +182,8 @@ void ofApp::draw(){
             glEnableClientState(GL_VERTEX_ARRAY);
             glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
             glDrawArrays(GL_POLYGON, 0, 5);
-        color = color/1.05;
+            color = color/1.05;
+        }
     }
     
     ofDisableAlphaBlending();   // turn it back off, if you don't need it
@@ -193,7 +192,7 @@ void ofApp::draw(){
     ofSetColor(150, 150, 150);
     ofDrawRectangle(wSize-wSize/4, 0, wSize/4, hSize/4);
     // mockup data:
-    ofSetColor(255, 0, 0);
+    ofSetColor(241, 226, 119);
     linePoints[0].set(ofMap(delta,0,1,wSize-wSize/4,wSize),ofMap(theta,0,1,0,hSize/4));
     linePoints[1].set(ofMap(theta,0,1,wSize-wSize/4,wSize),ofMap(alpha,0,1,0,hSize/4));
     linePoints[2].set(ofMap(alpha,0,1,wSize-wSize/4,wSize),ofMap(beta,0,1,0,hSize/4));
@@ -221,8 +220,8 @@ void ofApp::keyPressed(int key){
     //with s key press save to file the current data points
     if(key == 's'){
         dataFile.open("dataFile.txt",ofFile::Append);
-        //delta, theta, alpha, beta, gamma, offset, signal (0 or 1)
-        dataFile << ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(offset) +", signal: "+ ofToString(signalGood) +"\n";
+        //delta, theta, alpha, beta, gamma, offset, randomColor, signal (0 or 1)
+        dataFile << ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(offset) + "," + ofToString(randomColor) + ", signal: "+ ofToString(signalGood) +"\n";
     }
 }
 
@@ -274,4 +273,7 @@ void ofApp::gotMessage(ofMessage msg){
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
+}
+void ofApp::exit(){
+    dataFile.close();
 }
