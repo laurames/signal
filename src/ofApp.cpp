@@ -107,7 +107,7 @@ void ofApp::update(){
             rightForehead = msg.getArgAsInt(2);
             rightEar = msg.getArgAsInt(3);
         }
-        offset = ofRandom(-1, 1)*ofRandom(hSize);
+        offset = ofRandom(-1, 1)*ofRandom(hSize/4);
         randomColor = ofRandom(255);
     }
     
@@ -165,51 +165,87 @@ void ofApp::draw(){
     //cout << linesOfTheFile.size() << endl;
     
     ofEnableAlphaBlending();    // turn on alpha blending
-    int color = 255;
+    int opacity = 50;
     if(linesOfTheFile.size()>1){
-        for(int i=linesOfTheFile.size()-1; i>=0; i--){
+        for(int i=0; i<linesOfTheFile.size(); i++){
             vector <string> splitItems = ofSplitString(linesOfTheFile[i], ",");
             int offset2 = ofToFloat(splitItems[5]);
             int randomC = ofToInt(splitItems[6]);
-            //ofSetColor(241-i, 226-i*2, 119-i*2, color/1.05);
-            ofSetColor(randomC, randomC-10, randomC+10, color/1.05);
             
+            //with solid color
+            //ofSetColor(241-i, 226-i*2, 119-i*2, color/1.05);
+            ofSetColor(randomC, 226, 119, opacity);
             
             linePoints[0].set(ofMap( ofToFloat(splitItems[0]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[1]),0,1,0,768) + offset2);
             linePoints[1].set(ofMap( ofToFloat(splitItems[1]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[2]),0,1,0,768) + offset2);
             linePoints[2].set(ofMap( ofToFloat(splitItems[2]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[3]),0,1,0,768) + offset2);
             linePoints[3].set(ofMap( ofToFloat(splitItems[3]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[4]),0,1,0,768) + offset2);
             linePoints[4].set(ofMap( ofToFloat(splitItems[4]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[0]),0,1,0,768) + offset2);
-            
             glEnableClientState(GL_VERTEX_ARRAY);
             glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
             glDrawArrays(GL_POLYGON, 0, 5);
-            color = color/1.05;
+            
+            if(!linesOfTheFile.empty() && i == linesOfTheFile.size()-1){
+                //with stroke
+                ofNoFill();
+                ofSetColor(255, 255, 255);
+                ofSetLineWidth(2);
+                linePoints[0].set(ofMap( ofToFloat(splitItems[0]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[1]),0,1,0,768) + offset2);
+                linePoints[1].set(ofMap( ofToFloat(splitItems[1]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[2]),0,1,0,768) + offset2);
+                linePoints[2].set(ofMap( ofToFloat(splitItems[2]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[3]),0,1,0,768) + offset2);
+                linePoints[3].set(ofMap( ofToFloat(splitItems[3]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[4]),0,1,0,768) + offset2);
+                linePoints[4].set(ofMap( ofToFloat(splitItems[4]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[0]),0,1,0,768) + offset2);
+                glEnableClientState(GL_VERTEX_ARRAY);
+                glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
+                glDrawArrays(GL_POLYGON, 0, 5);
+                ofDrawBitmapString("delta", ofMap( ofToFloat(splitItems[0]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[1]),0,1,0,768) + offset2);
+                ofDrawBitmapString("theta", ofMap( ofToFloat(splitItems[1]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[2]),0,1,0,768) + offset2);
+                ofDrawBitmapString("alpha", ofMap( ofToFloat(splitItems[2]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[3]),0,1,0,768) + offset2);
+                ofDrawBitmapString("beta", ofMap( ofToFloat(splitItems[3]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[4]),0,1,0,768) + offset2);
+                ofDrawBitmapString("gamma", ofMap( ofToFloat(splitItems[4]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[0]),0,1,0,768) + offset2);
+            }
+            opacity = opacity+3;
         }
     }
     
     ofDisableAlphaBlending();   // turn it back off, if you don't need it
     
     //------------------ YOUR CURRENT DATA ------------------//
+    ofFill();
     ofSetColor(150, 150, 150);
-    ofDrawRectangle(wSize-wSize/4, 0, wSize/4, hSize/4);
+    float recMinW = (wSize-wSize/4)-20, recMaxW = wSize/4, recMinH = 30, recMaxH = (hSize/4)+30, recMaxWposition = wSize-20;
+    //x,y (upper right hand corner), width, height
+    ofDrawRectangle(recMinW, recMinH, wSize/4, hSize/4);
     // mockup data:
-    ofSetColor(241, 226, 119);
-    linePoints[0].set(ofMap(delta,0,1,wSize-wSize/4,wSize),ofMap(theta,0,1,0,hSize/4));
-    linePoints[1].set(ofMap(theta,0,1,wSize-wSize/4,wSize),ofMap(alpha,0,1,0,hSize/4));
-    linePoints[2].set(ofMap(alpha,0,1,wSize-wSize/4,wSize),ofMap(beta,0,1,0,hSize/4));
-    linePoints[3].set(ofMap(beta,0,1,wSize-wSize/4,wSize),ofMap(gamma,0,1,0,hSize/4));
-    linePoints[4].set(ofMap(gamma,0,1,wSize-wSize/4,wSize),ofMap(delta,0,1,0,hSize/4));
-    
+    ofSetColor(241, 150, 150);
+    //float ofMap(float value, float inputMin, float inputMax, float outputMin, float outputMax)
+    linePoints[0].set(ofMap(delta,0,1,recMinW,recMaxWposition),ofMap(theta,0,1,recMinH,recMaxH));
+    linePoints[1].set(ofMap(theta,0,1,recMinW,recMaxWposition),ofMap(alpha,0,1,recMinH,recMaxH));
+    linePoints[2].set(ofMap(alpha,0,1,recMinW,recMaxWposition),ofMap(beta,0,1,recMinH,recMaxH));
+    linePoints[3].set(ofMap(beta,0,1,recMinW,recMaxWposition),ofMap(gamma,0,1,recMinH,recMaxH));
+    linePoints[4].set(ofMap(gamma,0,1,recMinW,recMaxWposition),ofMap(delta,0,1,recMinH,recMaxH));
     glEnableClientState(GL_VERTEX_ARRAY);
     glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
     glDrawArrays(GL_POLYGON, 0, 5);
     
-    //------------------ DEBUGGING TEXTS (LEFT CORNER) ------------------//
-    // colours for debug text
+    //and the labels & colour for debug text:
     ofSetColor(255,255,255);
+    int pointR = 2;
+    ofDrawCircle(ofMap(delta,0,1,recMinW,recMaxWposition),ofMap(theta,0,1,recMinH,recMaxH), pointR);
+    ofDrawCircle(ofMap(theta,0,1,recMinW,recMaxWposition),ofMap(alpha,0,1,recMinH,recMaxH), pointR);
+    ofDrawCircle(ofMap(alpha,0,1,recMinW,recMaxWposition),ofMap(beta,0,1,recMinH,recMaxH), pointR);
+    ofDrawCircle(ofMap(beta,0,1,recMinW,recMaxWposition),ofMap(gamma,0,1,recMinH,recMaxH), pointR);
+    ofDrawCircle(ofMap(gamma,0,1,recMinW,recMaxWposition),ofMap(delta,0,1,recMinH,recMaxH), pointR);
+    ofDrawBitmapString("delta", ofMap(delta,0,1,recMinW,recMaxWposition),ofMap(theta,0,1,recMinH,recMaxH));
+    ofDrawBitmapString("theta", ofMap(theta,0,1,recMinW,recMaxWposition),ofMap(alpha,0,1,recMinH,recMaxH));
+    ofDrawBitmapString("alpha", ofMap(alpha,0,1,recMinW,recMaxWposition),ofMap(beta,0,1,recMinH,recMaxH));
+    ofDrawBitmapString("beta", ofMap(beta,0,1,recMinW,recMaxWposition),ofMap(gamma,0,1,recMinH,recMaxH));
+    ofDrawBitmapString("gamma", ofMap(gamma,0,1,recMinW,recMaxWposition),ofMap(delta,0,1,recMinH,recMaxH));
+    
+    //------------------ DEBUGGING TEXTS (LEFT CORNER) ------------------//
+    
     //debug messages:
-    ofDrawBitmapString("Your current data:", ofGetWidth()-(ofGetWidth()/4)+10, 20);
+    ofDrawBitmapString("Your current data:", ofGetWidth()-(ofGetWidth()/4)+5, 20);
     ofDrawBitmapString("Headband battery at: " + ofToString(batteryPercentage) + "%", 50, 20);
     ofDrawBitmapString("leftEar: " + ofToString(leftEar) + ", leftForehead: " + ofToString(leftForehead) + ", rightForehead: " + ofToString(rightForehead) + ", rightEar: " + ofToString(rightEar), 50, 35);
     ofDrawBitmapString("Mock data: " + ofToString(mockdata), 50, 50);
@@ -221,7 +257,7 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
     //with s key press save to file the current data points:
     if(key == 's'){
-        if(linesOfTheFile.size() > 25){
+        if(linesOfTheFile.size() > 49){
             linesOfTheFile.erase(linesOfTheFile.begin());
         }
         linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(offset) + "," + ofToString(randomColor) + ", signal: "+ ofToString(signalGood));
