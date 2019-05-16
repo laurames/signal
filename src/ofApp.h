@@ -68,6 +68,7 @@ class ofApp : public ofBaseApp{
     vector < string > linesOfTheFile;
     int offset = 0;
     int randomColor;
+    int vertexOfShape = 0;
     
     //timer for saving file:
     int tick = 0;
