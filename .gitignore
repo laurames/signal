@@ -1,6 +1,6 @@
 *~
 .DS_Store
 bin/muse_v2Debug.app
-bin/muse_v2Debug.app/*
-muse_v2.xcodeproj/*
+bin/muse_v2Debug.app/
+muse_v2.xcodeproj/
 muse_v2.xcodeproj
