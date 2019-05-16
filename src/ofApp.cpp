@@ -22,6 +22,7 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    //counter for saving data into file:
     if(tick > 30){
         dataFile.open("dataFile.txt",ofFile::WriteOnly);
         if(linesOfTheFile.size()>1){
@@ -39,6 +40,7 @@ void ofApp::update(){
     while (receiver.hasWaitingMessages()) {
         ofxOscMessage msg;
         receiver.getNextMessage(msg);
+        receiving = true;
         
         // all available messages (a lot with muse): https://sites.google.com/a/interaxon.ca/muse-developer-site/museio/osc-paths/3-4-0
         //ofLog() << msg.getAddress() << " : " << msg.getNumArgs();// << " : " << msg.getArgAsFloat(0);
@@ -110,6 +112,7 @@ void ofApp::update(){
         offset = ofRandom(-1, 1)*ofRandom(hSize/4);
         randomColor = ofRandom(255);
     }
+    receiving = false;
     
 }
 
@@ -161,7 +164,7 @@ void ofApp::draw(){
     
     //------------------ READING FILE DATA ------------------//
     
-    //for debugging (how many data points in file):
+    //for debugging (how many lines of data in file):
     //cout << linesOfTheFile.size() << endl;
     
     ofEnableAlphaBlending();    // turn on alpha blending
@@ -176,6 +179,8 @@ void ofApp::draw(){
             //ofSetColor(241-i, 226-i*2, 119-i*2, color/1.05);
             ofSetColor(randomC, 226, 119, opacity);
             
+            
+            // Drawing sharp shapes:
             linePoints[0].set(ofMap( ofToFloat(splitItems[0]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[1]),0,1,0,768) + offset2);
             linePoints[1].set(ofMap( ofToFloat(splitItems[1]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[2]),0,1,0,768) + offset2);
             linePoints[2].set(ofMap( ofToFloat(splitItems[2]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[3]),0,1,0,768) + offset2);
@@ -204,11 +209,12 @@ void ofApp::draw(){
                 ofDrawBitmapString("beta", ofMap( ofToFloat(splitItems[3]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[4]),0,1,0,768) + offset2);
                 ofDrawBitmapString("gamma", ofMap( ofToFloat(splitItems[4]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[0]),0,1,0,768) + offset2);
             }
+            
             opacity = opacity+3;
         }
     }
     
-    ofDisableAlphaBlending();   // turn it back off, if you don't need it
+    ofDisableAlphaBlending();   // turn alphaBlending off when not used
     
     //------------------ YOUR CURRENT DATA ------------------//
     ofFill();
@@ -228,28 +234,33 @@ void ofApp::draw(){
     glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
     glDrawArrays(GL_POLYGON, 0, 5);
     
+    //------------------ DEBUGGING TEXTS (LEFT CORNER & RIGHT BOX) ------------------//
+    
     //and the labels & colour for debug text:
     ofSetColor(255,255,255);
-    int pointR = 2;
-    ofDrawCircle(ofMap(delta,0,1,recMinW,recMaxWposition),ofMap(theta,0,1,recMinH,recMaxH), pointR);
-    ofDrawCircle(ofMap(theta,0,1,recMinW,recMaxWposition),ofMap(alpha,0,1,recMinH,recMaxH), pointR);
-    ofDrawCircle(ofMap(alpha,0,1,recMinW,recMaxWposition),ofMap(beta,0,1,recMinH,recMaxH), pointR);
-    ofDrawCircle(ofMap(beta,0,1,recMinW,recMaxWposition),ofMap(gamma,0,1,recMinH,recMaxH), pointR);
-    ofDrawCircle(ofMap(gamma,0,1,recMinW,recMaxWposition),ofMap(delta,0,1,recMinH,recMaxH), pointR);
-    ofDrawBitmapString("delta", ofMap(delta,0,1,recMinW,recMaxWposition),ofMap(theta,0,1,recMinH,recMaxH));
-    ofDrawBitmapString("theta", ofMap(theta,0,1,recMinW,recMaxWposition),ofMap(alpha,0,1,recMinH,recMaxH));
-    ofDrawBitmapString("alpha", ofMap(alpha,0,1,recMinW,recMaxWposition),ofMap(beta,0,1,recMinH,recMaxH));
-    ofDrawBitmapString("beta", ofMap(beta,0,1,recMinW,recMaxWposition),ofMap(gamma,0,1,recMinH,recMaxH));
-    ofDrawBitmapString("gamma", ofMap(gamma,0,1,recMinW,recMaxWposition),ofMap(delta,0,1,recMinH,recMaxH));
-    
-    //------------------ DEBUGGING TEXTS (LEFT CORNER) ------------------//
+    if(receiving){
+        int pointR = 2;
+        ofDrawCircle(ofMap(delta,0,1,recMinW,recMaxWposition),ofMap(theta,0,1,recMinH,recMaxH), pointR);
+        ofDrawCircle(ofMap(theta,0,1,recMinW,recMaxWposition),ofMap(alpha,0,1,recMinH,recMaxH), pointR);
+        ofDrawCircle(ofMap(alpha,0,1,recMinW,recMaxWposition),ofMap(beta,0,1,recMinH,recMaxH), pointR);
+        ofDrawCircle(ofMap(beta,0,1,recMinW,recMaxWposition),ofMap(gamma,0,1,recMinH,recMaxH), pointR);
+        ofDrawCircle(ofMap(gamma,0,1,recMinW,recMaxWposition),ofMap(delta,0,1,recMinH,recMaxH), pointR);
+        ofDrawBitmapString("delta", ofMap(delta,0,1,recMinW,recMaxWposition),ofMap(theta,0,1,recMinH,recMaxH));
+        ofDrawBitmapString("theta", ofMap(theta,0,1,recMinW,recMaxWposition),ofMap(alpha,0,1,recMinH,recMaxH));
+        ofDrawBitmapString("alpha", ofMap(alpha,0,1,recMinW,recMaxWposition),ofMap(beta,0,1,recMinH,recMaxH));
+        ofDrawBitmapString("beta", ofMap(beta,0,1,recMinW,recMaxWposition),ofMap(gamma,0,1,recMinH,recMaxH));
+        ofDrawBitmapString("gamma", ofMap(gamma,0,1,recMinW,recMaxWposition),ofMap(delta,0,1,recMinH,recMaxH));
+    }
     
     //debug messages:
+    if(!receiving){
+        ofDrawBitmapString("HEADBAND NOT CONNECTED!", wSize-( (wSize/4)-10 ), (hSize/4)/2 );
+    }
     ofDrawBitmapString("Your current data:", ofGetWidth()-(ofGetWidth()/4)+5, 20);
     ofDrawBitmapString("Headband battery at: " + ofToString(batteryPercentage) + "%", 50, 20);
     ofDrawBitmapString("leftEar: " + ofToString(leftEar) + ", leftForehead: " + ofToString(leftForehead) + ", rightForehead: " + ofToString(rightForehead) + ", rightEar: " + ofToString(rightEar), 50, 35);
-    ofDrawBitmapString("Mock data: " + ofToString(mockdata), 50, 50);
-    //ofDrawBitmapString( ofToString(linesOfTheFile[linesOfTheFile.size()-1]) , 50, hSize-40 );
+    ofDrawBitmapString("delta: " + ofToString(delta) + ", theta: " + ofToString(theta) + ", alpha: " + ofToString(alpha) + ", beta: " + ofToString(beta) + + ", gamma: " + ofToString(gamma), 50, 50);
+    ofDrawBitmapString("Mock data: " + ofToString(mockdata), 50, 65);
 
 }
 

@@ -5,6 +5,12 @@
 
 #define SEND_PORT 5000
 
+class Line {
+    public:
+        ofPoint a;
+        ofPoint b;
+};
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -48,6 +54,7 @@ class ofApp : public ofBaseApp{
     float batteryPercentage = 100.0;
     float leftEar = 0, leftForehead = 0, rightForehead = 0, rightEar = 0;
     bool mockdata = false;
+    bool receiving = false;
     
     //screen sizes:
     float wSize = ofGetWidth();
@@ -64,4 +71,8 @@ class ofApp : public ofBaseApp{
     
     //timer for saving file:
     int tick = 0;
+    
+    //point drawing:
+    vector < ofPoint > drawnPoints;
+    vector < Line > lines;
 };
