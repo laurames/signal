@@ -91,6 +91,7 @@ void ofApp::update(){
         }else{
             //we write mock data:
             mockdata = true;
+            signalGood = false;
             delta = (float)ofRandom(0,1);
             theta = (float)ofRandom(0,1);
             alpha = (float)ofRandom(0,1);
@@ -117,9 +118,10 @@ void ofApp::update(){
             rightForehead = msg.getArgAsInt(2);
             rightEar = msg.getArgAsInt(3);
         }
+        /*
         offset = ofRandom(-1, 1)*ofRandom(wSize);
         randomColor = ofRandom(255);
-        vertexOfShape = ofRandom(0,4);
+        vertexOfShape = ofRandom(0,4);*/
     }
     
 }
@@ -173,7 +175,7 @@ void ofApp::draw(){
     //for debugging (how many lines of data in file):
     //cout << linesOfTheFile.size() << endl;
     
-    int opacity = 50;
+    //int opacity = 50;
     //ofEnableAlphaBlending();    // turn on alpha blending
     
     if(linesOfTheFile.size()>1 && linesOfTheFile[0] != ""){
@@ -198,8 +200,6 @@ void ofApp::draw(){
             for(int i=0; i<linesOfTheFile.size(); i++){
                 //we split it into a vector
                 splitItems = ofSplitString(linesOfTheFile[i], ",");
-                int offset2 = ofToFloat(splitItems[5]);
-                int randomC = ofToInt(splitItems[6]);
                 
                 for (int y=0; y<5; y++) {
                     if(y < 4){
@@ -227,8 +227,8 @@ void ofApp::draw(){
             for(int i=0; i<linesOfTheFile.size(); i++){
                 //we split it into a vector
                 splitItems = ofSplitString(linesOfTheFile[i], ",");
-                int offset2 = ofToFloat(splitItems[5]);
-                int randomC = ofToInt(splitItems[6]);
+                //int offset2 = ofToFloat(splitItems[5]);
+                //int randomC = ofToInt(splitItems[6]);
                 
                 for (int y=0; y<5; y++) {
                     if(y < 4){
@@ -238,7 +238,7 @@ void ofApp::draw(){
                     }
                 }
                 
-                opacity = opacity+3;
+                //opacity = opacity+3;
             }//end of for loop for i
             ofEndShape();
         }
@@ -321,7 +321,7 @@ void ofApp::keyPressed(int key){
             linesOfTheFile.erase(linesOfTheFile.begin());
         }
         //delta, theta, alpha, beta, gamma, offset, randomColor, vertexOfShape, signalGood
-        linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(offset) + "," + ofToString(randomColor) + "," + ofToString(vertexOfShape) + ", signal: "+ ofToString(signalGood));
+        linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + ", signal: "+ ofToString(signalGood));
     }
 }
 
@@ -347,7 +347,11 @@ void ofApp::mousePressed(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-
+    if(linesOfTheFile.size() > 29){
+        linesOfTheFile.erase(linesOfTheFile.begin());
+    }
+    //delta, theta, alpha, beta, gamma, offset, randomColor, vertexOfShape, signalGood
+    linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + ", signal: "+ ofToString(signalGood));
 }
 
 //--------------------------------------------------------------
