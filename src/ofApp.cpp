@@ -178,35 +178,70 @@ void ofApp::draw(){
     
     if(linesOfTheFile.size()>1 && linesOfTheFile[0] != ""){
         
-        ofSetColor(241, 226, 119);
-        ofSetPolyMode(OF_POLY_WINDING_ODD);
-        ofBeginShape();
-        
         vector <string> splitItems;
+        
         
         //blink detected
         if(blink == 1){
             ofSetColor(113, 178, 223);
-        }
-        
-        //runs through all the lines in the file:
-        for(int i=0; i<linesOfTheFile.size(); i++){
-            //we split it into a vector
-            splitItems = ofSplitString(linesOfTheFile[i], ",");
-            int offset2 = ofToFloat(splitItems[5]);
-            int randomC = ofToInt(splitItems[6]);
+            //------(f)--------------------------------------
+            //
+            //         ofCurveVertex
+            //
+            //         because it uses catmul rom splines, we need to repeat the first and last
+            //         items so the curve actually goes through those points
+            //
             
-            for (int y=0; y<5; y++) {
-                if(y < 4){
-                    ofVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[y+1]),0,1,0, hSize) );
-                }else{
-                    ofVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,0, hSize) );
+            ofSetHexColor(0x2bdbe6);
+            ofBeginShape();
+            //runs through all the lines in the file:
+            for(int i=0; i<linesOfTheFile.size(); i++){
+                //we split it into a vector
+                splitItems = ofSplitString(linesOfTheFile[i], ",");
+                int offset2 = ofToFloat(splitItems[5]);
+                int randomC = ofToInt(splitItems[6]);
+                
+                for (int y=0; y<5; y++) {
+                    if(y < 4){
+                        ofCurveVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[y+1]),0,1,0, hSize) );
+                    }else{
+                        ofCurveVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,0, hSize) );
+                    }
                 }
-            }
+                
+            }//end of for loop for i
+            ofEndShape();
+        } else {
+            ofSetColor(241, 226, 119);
+            //------(d)--------------------------------------
+            //
+            //         poylgon of eeg points ()
+            //
+            //         lots of self intersection, 500 pts is a good stress test
+            //
+            //
+            ofSetPolyMode(OF_POLY_WINDING_ODD);
+            ofBeginShape();
             
-            opacity = opacity+3;
-        }//end of for loop for i
-        ofEndShape();
+            //runs through all the lines in the file:
+            for(int i=0; i<linesOfTheFile.size(); i++){
+                //we split it into a vector
+                splitItems = ofSplitString(linesOfTheFile[i], ",");
+                int offset2 = ofToFloat(splitItems[5]);
+                int randomC = ofToInt(splitItems[6]);
+                
+                for (int y=0; y<5; y++) {
+                    if(y < 4){
+                        ofVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[y+1]),0,1,0, hSize) );
+                    }else{
+                        ofVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,0, hSize) );
+                    }
+                }
+                
+                opacity = opacity+3;
+            }//end of for loop for i
+            ofEndShape();
+        }
         
         ofNoFill();
         ofSetColor(255, 255, 255);
