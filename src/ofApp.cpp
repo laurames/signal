@@ -18,6 +18,7 @@ void ofApp::setup(){
     for (auto line : buffer.getLines()){
         linesOfTheFile.push_back(line);
     }
+    
 }
 
 //--------------------------------------------------------------
@@ -34,7 +35,7 @@ void ofApp::update(){
         dataFile.close();
         tick = 0;
     }
-    cout << tick << endl;
+    //cout << tick << endl;
     tick++;
     
     //reading messages from OSC
@@ -55,29 +56,28 @@ void ofApp::update(){
         if(leftEar == 1 && leftForehead == 1 && rightForehead == 1 && rightEar == 1){
             mockdata = false;
             if(msg.getAddress() == "/muse/elements/delta_relative") { //raw_fft0
-                cout << "delta is: " << endl;
-                cout << msg << endl;
+                /* cout << "delta is: " << endl;
+                cout << msg << endl; */
                 delta = getAverageFromChannels(msg);
-                //delta = ofMap(msg.getNumArgs(),0, 1682.815, 0, 1024);
                 
             } else if(msg.getAddress() == "/muse/elements/theta_relative") {
-                cout << "theta is: " << endl;
-                cout << msg << endl;
+                /* cout << "theta is: " << endl;
+                cout << msg << endl; */
                 theta = getAverageFromChannels(msg);
                 
             } else if(msg.getAddress() == "/muse/elements/alpha_relative") {
-                cout << "alpha is: " << endl;
-                cout << msg << endl;
+                /* cout << "alpha is: " << endl;
+                cout << msg << endl; */
                 alpha = getAverageFromChannels(msg);
                 
             } else if(msg.getAddress() == "/muse/elements/beta_relative") {
-                cout << "beta is: " << endl;
-                cout << msg << endl;
+                /* cout << "beta is: " << endl;
+                cout << msg << endl; */
                 beta = getAverageFromChannels(msg);
                 
             } else if(msg.getAddress() == "/muse/elements/gamma_relative") {
-                cout << "gamma is: " << endl;
-                cout << msg << endl;
+                /* cout << "gamma is: " << endl;
+                cout << msg << endl; */
                 gamma = getAverageFromChannels(msg);
                 
             }
@@ -96,6 +96,13 @@ void ofApp::update(){
             alpha = (float)ofRandom(0,1);
             beta = (float)ofRandom(0,1);
             gamma = (float)ofRandom(0,1);
+        }
+        
+        //reading blink data:
+        if(msg.getAddress() == "/muse/elements/blink"){ //if we have a bettery message
+            blink = msg.getArgAsFloat(0);
+            cout << "blink: " << endl;
+            cout << msg << endl;
         }
         
         //reading battery data:
@@ -161,98 +168,68 @@ float ofApp::getFromForeheadChannels(ofxOscMessage& msg) {
 //--------------------------------------------------------------
 void ofApp::draw(){
     
-    ofFill();
-    
     //------------------ READING FILE DATA ------------------//
     
     //for debugging (how many lines of data in file):
     //cout << linesOfTheFile.size() << endl;
     
-    ofEnableAlphaBlending();    // turn on alpha blending
     int opacity = 50;
-    float vertexForNext = 0.0,
-          x1  = 0.0, y1 = 0.0,
-          x2 = 0.0, y2 = 0.0,
-          x3 = 0.0, y3 = 0.0,
-          x4 = 0.0, y4 = 0.0,
-          x5 = 0.0, y5 = 0.0;
-    float wMapped = wSize/4, hMapped = hSize/4;
+    //ofEnableAlphaBlending();    // turn on alpha blending
+    
     if(linesOfTheFile.size()>1 && linesOfTheFile[0] != ""){
+        
+        ofSetColor(241, 226, 119);
+        ofSetPolyMode(OF_POLY_WINDING_ODD);
+        ofBeginShape();
+        
+        vector <string> splitItems;
+        
+        //blink detected
+        if(blink == 1){
+            ofSetColor(113, 178, 223);
+        }
+        
+        //runs through all the lines in the file:
         for(int i=0; i<linesOfTheFile.size(); i++){
-            vector <string> splitItems = ofSplitString(linesOfTheFile[i], ",");
+            //we split it into a vector
+            splitItems = ofSplitString(linesOfTheFile[i], ",");
             int offset2 = ofToFloat(splitItems[5]);
             int randomC = ofToInt(splitItems[6]);
             
-            //with solid color
-            //ofSetColor(241-i, 226-i*2, 119-i*2, color/1.05);
-            ofSetColor(randomC, 226, 119);
-            
-            // Drawing sharp shapes:
-            if(i != 0){
-                x1 = ofMap( vertexForNext,0,1,0, wMapped );
-                y1 = ofMap( ofToFloat(splitItems[1]),0,1,0, hMapped );
-                x2 = ofMap( ofToFloat(splitItems[1]),0,1,0, wMapped );
-                y2 = ofMap( ofToFloat(splitItems[2]),0,1,0, hMapped );
-                x3 = ofMap( ofToFloat(splitItems[2]),0,1,0, wMapped );
-                y3 = ofMap( ofToFloat(splitItems[3]),0,1,0, hMapped );
-                x4 = ofMap( ofToFloat(splitItems[3]),0,1,0, wMapped );
-                y4 = ofMap( ofToFloat(splitItems[4]),0,1,0, hMapped );
-                x5 = ofMap( ofToFloat(splitItems[4]),0,1,0, wMapped );
-                y5 = ofMap( vertexForNext,0,1,0, hMapped );
-            } else {
-                x1 = ofMap( ofToFloat(splitItems[0]),0,1,0, wMapped );
-                y1 = ofMap( ofToFloat(splitItems[1]),0,1,0, hMapped );
-                x2 = ofMap( ofToFloat(splitItems[1]),0,1,0, wMapped );
-                y2 = ofMap( ofToFloat(splitItems[2]),0,1,0, hMapped );
-                x3 = ofMap( ofToFloat(splitItems[2]),0,1,0, wMapped );
-                y3 = ofMap( ofToFloat(splitItems[3]),0,1,0, hMapped );
-                x4 = ofMap( ofToFloat(splitItems[3]),0,1,0, wMapped );
-                y4 = ofMap( ofToFloat(splitItems[4]),0,1,0, hMapped );
-                x5 = ofMap( ofToFloat(splitItems[4]),0,1,0, wMapped );
-                y5 = ofMap( ofToFloat(splitItems[0]),0,1,0, hMapped );
-                
-                //the random vertex point (0-4) is stored in 7th value of the split string and we get that value for next round:
-                vertexForNext = ofToFloat(splitItems[ ofToFloat(splitItems[7]) ]);
+            for (int y=0; y<5; y++) {
+                if(y < 4){
+                    ofVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[y+1]),0,1,0, hSize) );
+                }else{
+                    ofVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,0, hSize) );
+                }
             }
-            //setting the x,y points
-            linePoints[0].set( x1, y1 );
-            linePoints[1].set( x2, y2 );
-            linePoints[2].set( x3, y3 );
-            linePoints[3].set( x4, y4 );
-            linePoints[4].set( x5, y5 );
-            
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
-            glDrawArrays(GL_POLYGON, 0, 5);
-            
-            /* Last shape that's the last one added to file or vector
-            if(!linesOfTheFile.empty() && i == linesOfTheFile.size()-1){
-                //with stroke
-                ofNoFill();
-                ofSetColor(255, 255, 255);
-                ofSetLineWidth(2);
-                linePoints[0].set(ofMap( ofToFloat(splitItems[0]),0,1,0,hMapped) + offset2,ofMap( ofToFloat(splitItems[1]),0,1,0,hMapped) + offset2);
-                linePoints[1].set(ofMap( ofToFloat(splitItems[1]),0,1,0,hMapped) + offset2,ofMap( ofToFloat(splitItems[2]),0,1,0,hMapped) + offset2);
-                linePoints[2].set(ofMap( ofToFloat(splitItems[2]),0,1,0,hMapped) + offset2,ofMap( ofToFloat(splitItems[3]),0,1,0,hMapped) + offset2);
-                linePoints[3].set(ofMap( ofToFloat(splitItems[3]),0,1,0,hMapped) + offset2,ofMap( ofToFloat(splitItems[4]),0,1,0,hMapped) + offset2);
-                linePoints[4].set(ofMap( ofToFloat(splitItems[4]),0,1,0,hMapped) + offset2,ofMap( ofToFloat(splitItems[0]),0,1,0,hMapped) + offset2);
-                glEnableClientState(GL_VERTEX_ARRAY);
-                glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
-                glDrawArrays(GL_POLYGON, 0, 5);
-                
-                
-                ofDrawBitmapString("delta", ofMap( ofToFloat(splitItems[0]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[1]),0,1,0,768) + offset2);
-                ofDrawBitmapString("theta", ofMap( ofToFloat(splitItems[1]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[2]),0,1,0,768) + offset2);
-                ofDrawBitmapString("alpha", ofMap( ofToFloat(splitItems[2]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[3]),0,1,0,768) + offset2);
-                ofDrawBitmapString("beta", ofMap( ofToFloat(splitItems[3]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[4]),0,1,0,768) + offset2);
-                ofDrawBitmapString("gamma", ofMap( ofToFloat(splitItems[4]),0,1,0,1024) + offset2,ofMap( ofToFloat(splitItems[0]),0,1,0,768) + offset2);
-            }*/
             
             opacity = opacity+3;
-        }
-    }
+        }//end of for loop for i
+        ofEndShape();
+        
+        ofNoFill();
+        ofSetColor(255, 255, 255);
+        ofSetLineWidth(2);
+        linePoints[0].set( ofMap( ofToFloat(splitItems[0]),0,1,0, wSize), ofMap( ofToFloat(splitItems[1]),0,1,0, hSize) );
+        linePoints[1].set( ofMap( ofToFloat(splitItems[1]),0,1,0, wSize), ofMap( ofToFloat(splitItems[2]),0,1,0, hSize) );
+        linePoints[2].set( ofMap( ofToFloat(splitItems[2]),0,1,0, wSize), ofMap( ofToFloat(splitItems[3]),0,1,0, hSize) );
+        linePoints[3].set( ofMap( ofToFloat(splitItems[3]),0,1,0, wSize), ofMap( ofToFloat(splitItems[4]),0,1,0, hSize) );
+        linePoints[4].set( ofMap( ofToFloat(splitItems[4]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,0, hSize) );
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
+        glDrawArrays(GL_POLYGON, 0, 5);
+        
+        
+        ofDrawBitmapString("delta", ofMap( ofToFloat(splitItems[0]),0,1,0, wSize), ofMap( ofToFloat(splitItems[1]),0,1,0, hSize) );
+        ofDrawBitmapString("theta", ofMap( ofToFloat(splitItems[1]),0,1,0, wSize), ofMap( ofToFloat(splitItems[2]),0,1,0, hSize) );
+        ofDrawBitmapString("alpha", ofMap( ofToFloat(splitItems[2]),0,1,0, wSize), ofMap( ofToFloat(splitItems[3]),0,1,0, hSize) );
+        ofDrawBitmapString("beta", ofMap( ofToFloat(splitItems[3]),0,1,0, wSize), ofMap( ofToFloat(splitItems[4]),0,1,0, hSize) );
+        ofDrawBitmapString("gamma", ofMap( ofToFloat(splitItems[4]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,0, hSize));
+        
+    }//end of path
     
-    ofDisableAlphaBlending();   // turn alphaBlending off when not used
+    //ofDisableAlphaBlending();   // turn alphaBlending off when not used
     
     //------------------ YOUR CURRENT DATA ------------------//
     ofFill();
@@ -298,14 +275,14 @@ void ofApp::draw(){
     ofDrawBitmapString("leftEar: " + ofToString(leftEar) + ", leftForehead: " + ofToString(leftForehead) + ", rightForehead: " + ofToString(rightForehead) + ", rightEar: " + ofToString(rightEar), 50, 35);
     ofDrawBitmapString("delta: " + ofToString(delta) + ", theta: " + ofToString(theta) + ", alpha: " + ofToString(alpha) + ", beta: " + ofToString(beta) + + ", gamma: " + ofToString(gamma), 50, 50);
     ofDrawBitmapString("Mock data: " + ofToString(mockdata), 50, 65);
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     //with s key press save to file the current data points:
     if(key == 's'){
-        if(linesOfTheFile.size() > 49){
+        if(linesOfTheFile.size() > 29){
             linesOfTheFile.erase(linesOfTheFile.begin());
         }
         //delta, theta, alpha, beta, gamma, offset, randomColor, vertexOfShape, signalGood
