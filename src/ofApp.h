@@ -46,6 +46,22 @@ class ofApp : public ofBaseApp{
     //blink data
     float blink = 0;
     
+    //jaw clench data
+    float jawClench = 0;
+    
+    //headband touching forhead
+    int onForehead = 0.0;
+    
+    /*Accelerometer Data
+    int change = 0;
+    float accX = 0.0;
+    float accY = 0.0;
+    float accZ = 0.0;
+    float accXchange = 0.0;
+    float accYchange = 0.0;
+    float accZchange = 0.0;*/
+    
+    
     //debugging variables:
     bool signalGood = false;
     float batteryPercentage = 0.0;

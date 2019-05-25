@@ -4,6 +4,7 @@
 void ofApp::setup(){
     ofSetFrameRate(2); //framerate
     ofBackground(0,0,0); //black background
+    ofHideCursor();
     
     // OSC Setup
     receiver.setup(SEND_PORT); //we are listening to the port 5000 defined in ofApp.h
@@ -100,11 +101,36 @@ void ofApp::update(){
         }
         
         //reading blink data:
-        if(msg.getAddress() == "/muse/elements/blink"){ //if we have a bettery message
+        if(msg.getAddress() == "/muse/elements/blink"){
             blink = msg.getArgAsFloat(0);
             cout << "blink: " << endl;
             cout << msg << endl;
         }
+        
+        //reading jaw clenching:
+        if(msg.getAddress() == "/muse/elements/jaw_clench" ){
+            jawClench = msg.getArgAsFloat(0);
+        }
+        
+        //headband touching forhead
+        if(msg.getAddress() == "/muse/elements/touching_forehead" ){
+            onForehead = msg.getArgAsFloat(0);
+        }
+        
+        /*read Accelerometer Data:
+        if(msg.getAddress() == "/muse/acc" ){
+            if(change == 1){
+                accX = msg.getArgAsFloat(0);
+                accY = msg.getArgAsFloat(1);
+                accZ = msg.getArgAsFloat(2);
+                change = 0;
+            } else {
+                accXchange = msg.getArgAsFloat(0);
+                accYchange = msg.getArgAsFloat(1);
+                accZchange = msg.getArgAsFloat(2);
+                change = 1;
+            }
+        }*/
         
         //reading battery data:
         if(msg.getAddress() == "/muse/batt"){ //if we have a bettery message
@@ -118,10 +144,6 @@ void ofApp::update(){
             rightForehead = msg.getArgAsInt(2);
             rightEar = msg.getArgAsInt(3);
         }
-        /*
-        offset = ofRandom(-1, 1)*ofRandom(wSize);
-        randomColor = ofRandom(255);
-        vertexOfShape = ofRandom(0,4);*/
     }
     
 }
@@ -175,17 +197,35 @@ void ofApp::draw(){
     //for debugging (how many lines of data in file):
     //cout << linesOfTheFile.size() << endl;
     
-    //int opacity = 50;
-    //ofEnableAlphaBlending();    // turn on alpha blending
+    //blink detected save a data point:
+    if(blink == 1){
+        if(linesOfTheFile.size() > 9){
+            linesOfTheFile.erase(linesOfTheFile.begin());
+        }
+        //delta, theta, alpha, beta, gamma, offset, randomColor, vertexOfShape, signalGood
+        linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(ofRandom(255)) + ", signal: "+ ofToString(signalGood));
+    }
     
     if(linesOfTheFile.size()>1 && linesOfTheFile[0] != ""){
         
         vector <string> splitItems;
         
+        /*if(onForehead == 1){
+            cout << "accX, accXchange" << endl;
+            cout << accX << endl;
+            cout << accXchange << endl;
+            //cout << accZ << endl;
+            
+            if( accX != 0.0 && accX+20 < accXchange ){
+                //LEFT
+                hSize + 100;
+                wSize + 100;
+            }
+        }*/
         
-        //blink detected
-        if(blink == 1){
-            ofSetColor(113, 178, 223);
+        if(jawClench == 1){
+            
+            ofSetColor(113, 178, 223); //blue
             //------(f)--------------------------------------
             //
             //         ofCurveVertex
@@ -212,7 +252,6 @@ void ofApp::draw(){
             }//end of for loop for i
             ofEndShape();
         } else {
-            ofSetColor(241, 226, 119);
             //------(d)--------------------------------------
             //
             //         poylgon of eeg points ()
@@ -221,36 +260,39 @@ void ofApp::draw(){
             //
             //
             ofSetPolyMode(OF_POLY_WINDING_ODD);
-            ofBeginShape();
             
+            ofEnableAlphaBlending();
+            int opasity = 50;
             //runs through all the lines in the file:
             for(int i=0; i<linesOfTheFile.size(); i++){
+                
                 //we split it into a vector
                 splitItems = ofSplitString(linesOfTheFile[i], ",");
-                //int offset2 = ofToFloat(splitItems[5]);
-                //int randomC = ofToInt(splitItems[6]);
+                int randomC = ofToInt(splitItems[5]);
+                ofSetColor(randomC, 226, 119, opasity);
                 
+                ofBeginShape();
                 for (int y=0; y<5; y++) {
                     if(y < 4){
-                        ofVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[y+1]),0,1,0, hSize) );
+                        ofVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[y+1]),0,1,50, hSize) );
                     }else{
-                        ofVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,0, hSize) );
+                        ofVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,50, hSize) );
                     }
-                }
+                }ofEndShape();
                 
-                //opacity = opacity+3;
+                opasity += 10;
             }//end of for loop for i
-            ofEndShape();
+            ofDisableAlphaBlending();
         }
         
         ofNoFill();
         ofSetColor(255, 255, 255);
         ofSetLineWidth(2);
-        linePoints[0].set( ofMap( ofToFloat(splitItems[0]),0,1,0, wSize), ofMap( ofToFloat(splitItems[1]),0,1,0, hSize) );
-        linePoints[1].set( ofMap( ofToFloat(splitItems[1]),0,1,0, wSize), ofMap( ofToFloat(splitItems[2]),0,1,0, hSize) );
-        linePoints[2].set( ofMap( ofToFloat(splitItems[2]),0,1,0, wSize), ofMap( ofToFloat(splitItems[3]),0,1,0, hSize) );
-        linePoints[3].set( ofMap( ofToFloat(splitItems[3]),0,1,0, wSize), ofMap( ofToFloat(splitItems[4]),0,1,0, hSize) );
-        linePoints[4].set( ofMap( ofToFloat(splitItems[4]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,0, hSize) );
+        linePoints[0].set( ofMap( ofToFloat(splitItems[0]),0,1,0, wSize), ofMap( ofToFloat(splitItems[1]),0,1,50, hSize) );
+        linePoints[1].set( ofMap( ofToFloat(splitItems[1]),0,1,0, wSize), ofMap( ofToFloat(splitItems[2]),0,1,50, hSize) );
+        linePoints[2].set( ofMap( ofToFloat(splitItems[2]),0,1,0, wSize), ofMap( ofToFloat(splitItems[3]),0,1,50, hSize) );
+        linePoints[3].set( ofMap( ofToFloat(splitItems[3]),0,1,0, wSize), ofMap( ofToFloat(splitItems[4]),0,1,50, hSize) );
+        linePoints[4].set( ofMap( ofToFloat(splitItems[4]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,50, hSize) );
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(2, GL_FLOAT, sizeof(ofVec2f), &linePoints[0].x);
         glDrawArrays(GL_POLYGON, 0, 5);
@@ -263,8 +305,6 @@ void ofApp::draw(){
         ofDrawBitmapString("gamma", ofMap( ofToFloat(splitItems[4]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,0, hSize));
         
     }//end of path
-    
-    //ofDisableAlphaBlending();   // turn alphaBlending off when not used
     
     //------------------ YOUR CURRENT DATA ------------------//
     ofFill();
@@ -306,22 +346,24 @@ void ofApp::draw(){
         ofDrawBitmapString("HEADBAND NOT CONNECTED!", wSize-( (wSize/4)-10 ), (hSize/4)/2 );
     }
     ofDrawBitmapString("Your current data:", ofGetWidth()-(ofGetWidth()/4)+5, 20);
-    ofDrawBitmapString("Headband battery at: " + ofToString(batteryPercentage) + "%", 50, 20);
-    ofDrawBitmapString("leftEar: " + ofToString(leftEar) + ", leftForehead: " + ofToString(leftForehead) + ", rightForehead: " + ofToString(rightForehead) + ", rightEar: " + ofToString(rightEar), 50, 35);
-    ofDrawBitmapString("delta: " + ofToString(delta) + ", theta: " + ofToString(theta) + ", alpha: " + ofToString(alpha) + ", beta: " + ofToString(beta) + + ", gamma: " + ofToString(gamma), 50, 50);
-    ofDrawBitmapString("Mock data: " + ofToString(mockdata), 50, 65);
-    
+    ofDrawBitmapStringHighlight("Headband battery at: " + ofToString(batteryPercentage) + "%", 50, 20);
+    ofDrawBitmapStringHighlight("leftEar: " + ofToString(leftEar) + ", leftForehead: " + ofToString(leftForehead) + ", rightForehead: " + ofToString(rightForehead) + ", rightEar: " + ofToString(rightEar), 50, 35);
+    ofDrawBitmapStringHighlight("delta: " + ofToString(delta) + ", theta: " + ofToString(theta) + ", alpha: " + ofToString(alpha) + ", beta: " + ofToString(beta) + + ", gamma: " + ofToString(gamma), 50, 50);
+    ofDrawBitmapStringHighlight("Mock data: " + ofToString(mockdata), 50, 65);
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
     //with s key press save to file the current data points:
     if(key == 's'){
-        if(linesOfTheFile.size() > 29){
+        if(linesOfTheFile.size() > 9){
             linesOfTheFile.erase(linesOfTheFile.begin());
         }
         //delta, theta, alpha, beta, gamma, offset, randomColor, vertexOfShape, signalGood
-        linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + ", signal: "+ ofToString(signalGood));
+        linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(ofRandom(255)) + ", signal: "+ ofToString(signalGood));
+    }
+    if(key == 'c'){
+        linesOfTheFile.clear();
     }
 }
 
@@ -347,11 +389,11 @@ void ofApp::mousePressed(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-    if(linesOfTheFile.size() > 29){
+    if(linesOfTheFile.size() > 9){
         linesOfTheFile.erase(linesOfTheFile.begin());
     }
     //delta, theta, alpha, beta, gamma, offset, randomColor, vertexOfShape, signalGood
-    linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + ", signal: "+ ofToString(signalGood));
+    linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(ofRandom(255)) + ", signal: "+ ofToString(signalGood));
 }
 
 //--------------------------------------------------------------
