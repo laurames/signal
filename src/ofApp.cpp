@@ -243,9 +243,9 @@ void ofApp::draw(){
                 
                 for (int y=0; y<5; y++) {
                     if(y < 4){
-                        ofCurveVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[y+1]),0,1,0, hSize) );
+                        ofCurveVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[y+1]),0,1,50, hSize) );
                     }else{
-                        ofCurveVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,0, hSize) );
+                        ofCurveVertex( ofMap( ofToFloat(splitItems[y]),0,1,0, wSize), ofMap( ofToFloat(splitItems[0]),0,1,50, hSize) );
                     }
                 }
                 
@@ -354,14 +354,14 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    //with s key press save to file the current data points:
+    /*with s key press save to file the current data points:
     if(key == 's'){
         if(linesOfTheFile.size() > 9){
             linesOfTheFile.erase(linesOfTheFile.begin());
         }
         //delta, theta, alpha, beta, gamma, offset, randomColor, vertexOfShape, signalGood
         linesOfTheFile.push_back(ofToString(delta) + "," + ofToString(theta) + "," + ofToString(alpha) + "," + ofToString(beta) + "," + ofToString(gamma) + "," + ofToString(ofRandom(255)) + ", signal: "+ ofToString(signalGood));
-    }
+    }*/
     if(key == 'c'){
         linesOfTheFile.clear();
     }
