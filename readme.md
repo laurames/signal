@@ -7,7 +7,7 @@ This is an interactive artwork using the [Muse2014 headband](https://choosemuse.
 The exhibition website [Ristiaallokko/Crosswaves](https://risti.aallokko.art/)
 The facebook page [Ristiaallokko/Crosswaves](https://www.facebook.com/events/2364148737164552/)
 
-![muse eeg artwork](https://raw.githubusercontent.com/laurames/signal/master/2.JPEG)
+![artwork](https://raw.githubusercontent.com/laurames/signal/master/2.JPG)
 
 ## Artwork description
 
